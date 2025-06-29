@@ -1,52 +1,39 @@
-#include <iostream>
 #include <stdexcept>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <SDL3/SDL.h>
 
-int main()
+int main() 
 {
-	try
-	{
-		if (!glfwInit()) 
-		{
-			throw std::runtime_error("Failed to initialize GLFW");
-		}
+    try 
+    {
+        SDL_Init(SDL_INIT_VIDEO);
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        SDL_Window* window = SDL_CreateWindow("SDL3 Window", 800, 800, SDL_WINDOW_OPENGL);
+        if (!window) 
+        {
+            throw std::runtime_error(SDL_GetError());
+        }
 
-		GLFWwindow* window = glfwCreateWindow(800, 800, "Window", nullptr, nullptr);
-		if (window == nullptr)
-		{
-			glfwTerminate();
-			throw std::runtime_error("Failed to create GLFW window");
-		}
+        bool running = true;
+        while (running) 
+        {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) 
+            {
+                if (event.type == SDL_EVENT_QUIT) 
+                {
+                    running = false;
+                }
+            }
+        }
 
-		glfwMakeContextCurrent(window);
-		if (!gladLoadGL()) 
-		{
-			glfwTerminate();
-			throw std::runtime_error("Failed to initialize GLAD");
-		}
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 0;
+    }
+    catch (const std::exception& e) 
+{
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SDL Error", e.what(), nullptr);
+        return -1;
+    }
 
-		glfwSwapInterval(1);
-		glViewport(0, 0, 800, 800);
-
-		while (!glfwWindowShouldClose(window))
-		{
-			glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-		}
-		glfwTerminate();
-		return 0;
-	}
-
-	catch (const std::exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << std::endl;
-		return -1;
-	}
 }
